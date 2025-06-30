@@ -40,16 +40,13 @@ pipeline {
         stage('Send Metrics to Graphite') {
             steps {
                 script {
-                    // Send build success metric
+                    // Send build success metric (always 1 here since we're in success path)
                     sh "echo 'jenkins.library_app_pipeline.build.success 1 \$(date +%s)' | nc -q0 localhost 2003"
-                    
-                    // Send build duration metric
-                    sh "echo 'jenkins.library_app_pipeline.build.duration ${currentBuild.duration} \$(date +%s)' | nc -q0 localhost 2003"
-                    
-                    // CORRECTED test results metric
+                    // TEST: Send fixed duration metric for verification
+                    sh "echo 'jenkins.library_app_pipeline.build.test_duration 5000 \$(date +%s)' | nc -q0 localhost 2003"
+                    // Send test metric (corrected)
                     sh '''
-                        # Extract test counts and sum them
-                        TOTAL_TESTS=$(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F": " '{print \$2}' | paste -sd+ | bc)
+                        TOTAL_TESTS=$(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F": " '{print $2}' | paste -sd+ | bc)
                         echo "jenkins.library_app_pipeline.tests.total $TOTAL_TESTS $(date +%s)" | nc -q0 localhost 2003
                     '''
                 }
@@ -57,11 +54,14 @@ pipeline {
         }
     }
     post {
-        failure {
-            echo 'Build failed! Consider rollback or alert.'
+        always {
             script {
-                // Send build failure metric
-                sh "echo 'jenkins.library_app_pipeline.build.success 0 \$(date +%s)' | nc -q0 localhost 2003"
+                // REAL build duration (available only in post)
+                def duration = currentBuild.duration
+                sh "echo 'jenkins.library_app_pipeline.build.duration ${duration} \$(date +%s)' | nc -q0 localhost 2003"
+                // REAL build success (works for success/failure)
+                def success = currentBuild.result == 'SUCCESS' ? 1 : 0
+                sh "echo 'jenkins.library_app_pipeline.build.success ${success} \$(date +%s)' | nc -q0 localhost 2003"
             }
         }
     }
