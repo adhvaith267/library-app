@@ -48,8 +48,8 @@ pipeline {
                     
                     // CORRECTED test results metric
                     sh '''
-                        # Extract and sum test counts from all reports
-                        TOTAL_TESTS=$(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F" " "{print \$3}" | paste -sd+ | bc)
+                        # Extract test counts and sum them
+                        TOTAL_TESTS=$(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F": " '{print \$2}' | paste -sd+ | bc)
                         echo "jenkins.library_app_pipeline.tests.total $TOTAL_TESTS $(date +%s)" | nc -q0 localhost 2003
                     '''
                 }
