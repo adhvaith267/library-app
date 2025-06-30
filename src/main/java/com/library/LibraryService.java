@@ -56,5 +56,11 @@ public class LibraryService {
                 .filter(Book::isAvailable)
                 .toList();
     }
+    public void borrowBook(Long bookId) {
+    Book book = getBook(bookId);
+    if (book != null && book.getNumcopies() > 0) {
+        book.borrowBook();
+    }
+    }
 }
 

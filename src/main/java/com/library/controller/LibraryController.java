@@ -36,5 +36,11 @@ public class LibraryController {
         libraryService.addBook(title, author);
         return "redirect:/";
     }
+    @PostMapping("/borrow/{bookId}")
+    public String borrowBook(@PathVariable Long bookId) {
+    libraryService.borrowBook(bookId);
+    return "redirect:/";
+}
+
 }
 
