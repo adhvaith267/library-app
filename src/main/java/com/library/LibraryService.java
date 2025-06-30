@@ -19,11 +19,31 @@ public class LibraryService {
     }
     
     public Book addBook(String title, String author) {
+    // Check if book already exists
+    Book existingBook = findBookByTitleAndAuthor(title, author);
+    
+    if (existingBook != null) {
+        // If book exists, increase copy count
+        existingBook.setNumcopies(existingBook.getNumcopies() + 1);
+        return existingBook;
+    } else {
+        // If book doesn't exist, create new book
         Long id = idGenerator.getAndIncrement();
         Book book = new Book(id, title, author);
         books.put(id, book);
         return book;
     }
+}
+
+// Add this helper method to find existing books
+private Book findBookByTitleAndAuthor(String title, String author) {
+    return books.values().stream()
+            .filter(book -> book.getTitle().equalsIgnoreCase(title.trim()) && 
+                           book.getAuthor().equalsIgnoreCase(author.trim()))
+            .findFirst()
+            .orElse(null);
+}
+
     
     public List<Book> getAllBooks() {
         return new ArrayList<>(books.values());
