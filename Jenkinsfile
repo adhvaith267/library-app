@@ -46,8 +46,11 @@ pipeline {
                     // Send build duration metric
                     sh "echo 'jenkins.library_app_pipeline.build.duration ${currentBuild.duration} \$(date +%s)' | nc -q0 localhost 2003"
                     
-                    // Send test results metric (simplified and reliable)
-                    sh 'echo "jenkins.library_app_pipeline.tests.total $(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F" " "{print \$3}" | xargs)" $(date +%s) | nc -q0 localhost 2003'
+                    // Send test results metric (FIXED VERSION)
+                    sh '''
+                        TOTAL_TESTS=$(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F" " "{print \$3}" | xargs)
+                        echo "jenkins.library_app_pipeline.tests.total $TOTAL_TESTS $(date +%s)" | nc -q0 localhost 2003
+                    '''
                 }
             }
         }
