@@ -37,7 +37,6 @@ pipeline {
                 )
             }
         }
-        // New stage added here
         stage('Send Metrics to Graphite') {
             steps {
                 script {
@@ -47,8 +46,8 @@ pipeline {
                     // Send build duration metric
                     sh "echo 'jenkins.library_app_pipeline.build.duration ${currentBuild.duration} \$(date +%s)' | nc -q0 localhost 2003"
                     
-                    // Send test results metric
-                    sh "echo 'jenkins.library_app_pipeline.tests.total \$(grep -o \"Tests run: .*\" target/surefire-reports/*.txt | awk -F, \'{print \$1}\' | awk \'{print \$3}\') \$(date +%s)' | nc -q0 localhost 2003"
+                    // Send test results metric (simplified and reliable)
+                    sh 'echo "jenkins.library_app_pipeline.tests.total $(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F" " "{print \$3}" | xargs)" $(date +%s) | nc -q0 localhost 2003'
                 }
             }
         }
