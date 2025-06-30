@@ -33,7 +33,7 @@ pipeline {
                 ansiblePlaybook(
                     playbook: 'ansible/deploy.yml',
                     inventory: 'ansible/inventory.ini',
-                    extraVars: ["build_number=${env.BUILD_NUMBER}"],
+                    extraVars: [build_number: env.BUILD_NUMBER],
                     credentialsId: 'ssh-key'
                 )
             }
