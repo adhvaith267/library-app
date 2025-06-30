@@ -6,7 +6,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Jenkins will automatically checkout the code from your repo
                 checkout scm
             }
         }
@@ -38,10 +37,30 @@ pipeline {
                 )
             }
         }
+        // New stage added here
+        stage('Send Metrics to Graphite') {
+            steps {
+                script {
+                    // Send build success metric
+                    sh "echo 'jenkins.library_app_pipeline.build.success 1 \$(date +%s)' | nc -q0 localhost 2003"
+                    
+                    // Send build duration metric
+                    sh "echo 'jenkins.library_app_pipeline.build.duration ${currentBuild.duration} \$(date +%s)' | nc -q0 localhost 2003"
+                    
+                    // Send test results metric
+                    sh "echo 'jenkins.library_app_pipeline.tests.total \$(grep -o \"Tests run: .*\" target/surefire-reports/*.txt | awk -F, \'{print \$1}\' | awk \'{print \$3}\') \$(date +%s)' | nc -q0 localhost 2003"
+                }
+            }
+        }
     }
     post {
         failure {
             echo 'Build failed! Consider rollback or alert.'
+            script {
+                // Send build failure metric
+                sh "echo 'jenkins.library_app_pipeline.build.success 0 \$(date +%s)' | nc -q0 localhost 2003"
+            }
         }
     }
 }
+
