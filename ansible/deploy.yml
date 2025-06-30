@@ -13,11 +13,14 @@
       docker_container:
         name: library-app
         state: absent
+        force_kill: yes  # Force remove if needed
 
     - name: Run new container
       docker_container:
         name: library-app
-        image: "library-app:latest"
+        image: "library-app:{{ build_number }}"  # Uses Jenkins build number
         state: started
+        restart_policy: always  # Auto-restart on failure
         ports:
           - "8080:8080"
+
