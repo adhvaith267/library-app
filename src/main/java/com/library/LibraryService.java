@@ -12,7 +12,7 @@ public class LibraryService {
     private final AtomicLong idGenerator = new AtomicLong(1);
     
     public LibraryService() {
-        // Initialize with some books
+        // Initialize with some books (with 1 copy each)
         addBook("Effective Java", "Joshua Bloch");
         addBook("Clean Code", "Robert Martin");
         addBook("Spring in Action", "Craig Walls");
@@ -33,34 +33,11 @@ public class LibraryService {
         return books.get(id);
     }
     
-    public boolean borrowBook(Long id) {
-        Book book = books.get(id);
-        if (book != null && book.isAvailable()) {
-            book.setAvailable(false);
-            return true;
-        }
-        return false;
-    }
-    
-    public boolean returnBook(Long id) {
-        Book book = books.get(id);
-        if (book != null && !book.isAvailable()) {
-            book.setAvailable(true);
-            return true;
-        }
-        return false;
-    }
-    
-    public List<Book> getAvailableBooks() {
-        return books.values().stream()
-                .filter(Book::isAvailable)
-                .toList();
-    }
     public void borrowBook(Long bookId) {
-    Book book = getBook(bookId);
-    if (book != null && book.getNumcopies() > 0) {
-        book.borrowBook();
-    }
+        Book book = getBook(bookId);
+        if (book != null && book.getNumcopies() > 0) {
+            book.borrowBook();
+        }
     }
 }
 
