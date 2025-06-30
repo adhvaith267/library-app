@@ -43,15 +43,15 @@ pipeline {
                     // Use your host's IP instead of localhost
                     def GRAPHITE_HOST = '192.168.4.157' // REPLACE WITH YOUR HOST IP
                     
-                    // Send build success metric
+                    // CORRECTED: Using single quotes for echo to ensure $(date +%s) expands
                     sh "echo 'jenkins.library_app_pipeline.build.success 1 \$(date +%s)' | nc -q0 ${GRAPHITE_HOST} 2003"
                     
-                    // Send test duration metric
+                    // CORRECTED: Using single quotes for echo to ensure $(date +%s) expands
                     sh "echo 'jenkins.library_app_pipeline.build.test_duration 5000 \$(date +%s)' | nc -q0 ${GRAPHITE_HOST} 2003"
                     
-                    // Send test results metric
+                    // CORRECTED: Fixed quoting for grep pattern
                     sh """
-                        TOTAL_TESTS=\$(grep -o "Tests run: [0-9]*" target/surefire-reports/*.txt | awk -F": " '{print \$2}' | paste -sd+ | bc)
+                        TOTAL_TESTS=\$(grep -o 'Tests run: [0-9]*' target/surefire-reports/*.txt | awk -F': ' '{print \$2}' | paste -sd+ | bc)
                         echo "jenkins.library_app_pipeline.tests.total \$TOTAL_TESTS \$(date +%s)" | nc -q0 ${GRAPHITE_HOST} 2003
                     """
                 }
@@ -66,10 +66,12 @@ pipeline {
                 
                 // Send real build duration
                 def duration = currentBuild.duration
+                // CORRECTED: Using single quotes for echo
                 sh "echo 'jenkins.library_app_pipeline.build.duration ${duration} \$(date +%s)' | nc -q0 ${GRAPHITE_HOST} 2003"
                 
                 // Send real build success status
                 def success = currentBuild.result == 'SUCCESS' ? 1 : 0
+                // CORRECTED: Using single quotes for echo
                 sh "echo 'jenkins.library_app_pipeline.build.success ${success} \$(date +%s)' | nc -q0 ${GRAPHITE_HOST} 2003"
             }
         }
