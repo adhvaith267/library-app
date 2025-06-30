@@ -1,0 +1,23 @@
+---
+- name: Deploy Library Application
+  hosts: app_servers
+  become: yes
+  tasks:
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Stop existing container
+      docker_container:
+        name: library-app
+        state: absent
+
+    - name: Run new container
+      docker_container:
+        name: library-app
+        image: "library-app:latest"
+        state: started
+        ports:
+          - "8080:8080"
