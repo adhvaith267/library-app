@@ -26,24 +26,3 @@ This project demonstrates a robust **CI/CD pipeline** for a Java-based Library M
 5. **Deploy**: Ansible deploys the Docker container to the server.
 6. **Monitoring**: Metrics are sent to Graphite and visualized in Grafana.
 
-
-## How to Run Locally
-
-1. Clone the repository:
-    ```
-    git clone git@github.com:adhvaith267/library-app.git
-    ```
-2. Build the project:
-    ```
-    mvn clean package
-    ```
-3. Build and run the Docker image:
-    ```
-    docker build -t library-app .
-    docker run -p 8080:8080 library-app
-    ```
-4. Access the app at [http://localhost:8080](http://localhost:8080)
-
-## Credits
-
-Started by user **Adhvaith**.
