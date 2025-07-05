@@ -1,94 +1,85 @@
-CI/CD Pipeline Project with Jenkins, Maven, Docker, Ansible, Graphite, and Grafana
-Overview
-This project demonstrates a robust CI/CD pipeline for a Java application, integrating automated build, test, containerization, deployment, and real-time monitoring.
-Tools used:
+# Library Management System – CI/CD Pipeline
 
-Git – Version control
+## Overview
 
-Jenkins – CI/CD orchestration
+This project demonstrates a robust **CI/CD pipeline** for a Java-based Library Management System. The pipeline automates building, testing, containerizing, deploying, and monitoring the application using industry-standard DevOps tools.
 
-Maven – Build automation and dependency management
+## Tech Stack & Tools
 
-JUnit – Java unit testing
+| Tool      | Purpose                                      |
+|-----------|----------------------------------------------|
+| Git       | Version control                              |
+| Jenkins   | CI/CD orchestration                          |
+| Maven     | Build automation & dependency management     |
+| JUnit     | Unit testing                                 |
+| Docker    | Containerization                             |
+| Ansible   | Automated deployment                         |
+| Graphite  | Metrics collection                           |
+| Grafana   | Real-time monitoring & dashboards            |
 
-Docker – Containerization
+## Pipeline Stages
 
-Ansible – Automated deployment
+1. **Source Checkout**: Jenkins pulls the latest code from GitHub.
+2. **Build**: Maven compiles and packages the Java application.
+3. **Test**: JUnit tests are run; results are recorded in Jenkins.
+4. **Dockerize**: Docker builds an image from the JAR file.
+5. **Deploy**: Ansible deploys the Docker container to the server.
+6. **Monitoring**: Metrics are sent to Graphite and visualized in Grafana.
 
-Graphite – Metrics collection and storage
+## Jenkins Pipeline Example
 
-Grafana – Metrics visualization
+pipeline {
+agent any
+stages {
+stage('Checkout') {
+steps { git 'git@github.com:adhvaith267/library-app.git' }
+}
+stage('Build') {
+steps { sh 'mvn clean package' }
+}
+stage('Test') {
+steps {
+sh 'mvn test'
+junit 'target/surefire-reports/*.xml'
+}
+}
+stage('Dockerize') {
+steps { sh 'docker build -t library-app:${BUILD_NUMBER} .' }
+}
+stage('Deploy with Ansible') {
+steps {
+ansiblePlaybook credentialsId: 'ansible-ssh-key', playbook: 'ansible/deploy.yml', inventory: 'ansible/inventory.ini'
+}
+}
+stage('Send Metrics to Graphite') {
+steps {
+sh '''
+echo "jenkins.library_app_pipeline.build.success 1 $(date +%s)" | nc -q0 192.168.4.157 2003
+'''
+}
+}
+}
+}
 
-Architecture
 text
-Git → Jenkins → Maven (JUnit) → Docker → Ansible → Deployed App
-                          ↘ Metrics ↙
-                      Graphite ← Grafana
-Setup Instructions
-Prerequisites
-Docker & Docker Compose
 
-Java & Maven
+## How to Run Locally
 
-Jenkins (can be installed or run in Docker)
+1. Clone the repository:
+    ```
+    git clone git@github.com:adhvaith267/library-app.git
+    ```
+2. Build the project:
+    ```
+    mvn clean package
+    ```
+3. Build and run the Docker image:
+    ```
+    docker build -t library-app .
+    docker run -p 8080:8080 library-app
+    ```
+4. Access the app at [http://localhost:8080](http://localhost:8080)
 
-Ansible
+## Credits
 
-Graphite & Grafana (preferably via Docker)
-
-Git
-
-1. Clone the Repository
-bash
-git clone https://github.com/yourusername/your-repo.git
-cd your-repo
-2. Jenkins Setup
-Install Jenkins and required plugins: Pipeline, Docker, Ansible, JUnit, etc.
-
-Configure Maven and Docker in Jenkins global tool configuration.
-
-Add your Jenkinsfile to the repository root.
-
-3. Graphite & Grafana Setup
-Start Graphite and Grafana using Docker Compose:
-
-bash
-docker-compose up -d
-Access Graphite (usually at http://localhost:8082) and Grafana (http://localhost:3000).
-
-In Grafana, add Graphite as a data source.
-
-Create dashboards/panels for your metrics.
-
-4. Ansible Setup
-Ensure SSH access to your deployment target.
-
-Edit ansible/inventory.ini and ansible/deploy.yml as needed for your environment.
-
-Usage
-Make a code change and push to Git.
-
-Jenkins will automatically:
-
-Checkout code
-
-Build with Maven
-
-Run JUnit tests
-
-Build Docker image
-
-Deploy with Ansible
-
-Send metrics to Graphite
-
-View metrics and dashboards in Grafana.
-
-Pipeline Stages
-Stage	Description
-Checkout	Gets code from Git
-Build	Runs mvn clean package
-Test	Runs mvn test and publishes JUnit results
-Dockerize	Builds Docker image
-Deploy	Deploys using Ansible
-Send Metrics	Sends build/test metrics to Graphite
+Started by user **Adhvaith**.
