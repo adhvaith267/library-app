@@ -26,42 +26,6 @@ This project demonstrates a robust **CI/CD pipeline** for a Java-based Library M
 5. **Deploy**: Ansible deploys the Docker container to the server.
 6. **Monitoring**: Metrics are sent to Graphite and visualized in Grafana.
 
-## Jenkins Pipeline Example
-
-pipeline {
-agent any
-stages {
-stage('Checkout') {
-steps { git 'git@github.com:adhvaith267/library-app.git' }
-}
-stage('Build') {
-steps { sh 'mvn clean package' }
-}
-stage('Test') {
-steps {
-sh 'mvn test'
-junit 'target/surefire-reports/*.xml'
-}
-}
-stage('Dockerize') {
-steps { sh 'docker build -t library-app:${BUILD_NUMBER} .' }
-}
-stage('Deploy with Ansible') {
-steps {
-ansiblePlaybook credentialsId: 'ansible-ssh-key', playbook: 'ansible/deploy.yml', inventory: 'ansible/inventory.ini'
-}
-}
-stage('Send Metrics to Graphite') {
-steps {
-sh '''
-echo "jenkins.library_app_pipeline.build.success 1 $(date +%s)" | nc -q0 192.168.4.157 2003
-'''
-}
-}
-}
-}
-
-text
 
 ## How to Run Locally
 
